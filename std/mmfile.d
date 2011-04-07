@@ -454,7 +454,7 @@ class MmFile
     /**
      * Read-only property returning the file mode.
      */
-    Mode mode()
+    @property Mode mode()
     {
         debug (MMFILE) printf("MmFile.mode()\n");
         return mMode;

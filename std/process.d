@@ -356,7 +356,7 @@ version (Posix) string shell(string cmd)
     {
         result ~= line;
     }
-    f.close;
+    f.close();
     return result;
 }
 

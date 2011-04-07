@@ -171,7 +171,7 @@ public:
         assert(f.isOpen);
         file = f;
         this.format = format;
-        popFront; // prime the range
+        popFront(); // prime the range
     }
 
     /// Range primitive implementations.
@@ -193,7 +193,7 @@ public:
         file.readln(line);
         if (!line.length)
         {
-            file.detach;
+            file.detach();
         }
         else
         {
@@ -292,7 +292,7 @@ object refers to it anymore.
     ~this()
     {
         if (!p) return;
-        if (p.refs == 1) close;
+        if (p.refs == 1) close();
         else --p.refs;
     }
 
@@ -322,7 +322,7 @@ Throws exception in case of error.
  */
     void open(string name, in char[] stdioOpenmode = "rb")
     {
-        detach;
+        detach();
         auto another = File(name, stdioOpenmode);
         swap(this, another);
     }
@@ -334,7 +334,7 @@ opengroup.org/onlinepubs/007908799/xsh/_popen.html, _popen).
  */
     version(Posix) void popen(string command, in char[] stdioOpenmode = "r")
     {
-        detach;
+        detach();
         p = new Impl(errnoEnforce(.popen(command, stdioOpenmode),
                         "Cannot run command `"~command~"'"),
                 1, command, true);
@@ -845,7 +845,7 @@ with every line.  */
  cplusplus.com/reference/clibrary/cstdio/_tmpfile.html, _tmpfile). */
     static File tmpfile()
     {
-        auto h = errnoEnforce(core.stdc.stdio.tmpfile,
+        auto h = errnoEnforce(core.stdc.stdio.tmpfile(),
                 "Could not create temporary file with tmpfile()");
         File result = void;
         result.p = new Impl(h, 1, null);
@@ -904,19 +904,19 @@ Range that reads one line at a time. */
             file = f;
             this.terminator = terminator;
             keepTerminator = kt;
-            popFront; // prime the range
+            popFront(); // prime the range
             // @@@BUG@@@ line below should not exist
             //if (file.p) ++file.p.refs;
         }
 
         /// Range primitive implementations.
-        bool empty() const
+        @property bool empty() const
         {
             return !file.isOpen;
         }
 
         /// Ditto
-        Char[] front()
+        @property Char[] front()
         {
             return line;
         }
@@ -927,7 +927,7 @@ Range that reads one line at a time. */
             enforce(file.isOpen);
             file.readln(line, terminator);
             if (!line.length)
-                file.detach;
+                file.detach();
             else if (keepTerminator == KeepTerminator.no
                     && std.algorithm.endsWith(line, terminator))
                 line.length = line.length - 1;
@@ -2114,7 +2114,7 @@ class StdioException : Exception
 
 /**
 Initialize with a message and an error code. */
-    this(string message, uint e = .getErrno)
+    this(string message, uint e = .getErrno())
     {
         errno = e;
         version (Posix)
@@ -2147,7 +2147,7 @@ Initialize with a message and an error code. */
 /// ditto
     static void opCall()
     {
-        throw new StdioException(null, .getErrno);
+        throw new StdioException(null, .getErrno());
     }
 }
 

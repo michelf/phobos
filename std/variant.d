@@ -577,7 +577,7 @@ public:
      * assert(a == 6);
      * ----
      */
-    T * peek(T)()
+    @property T * peek(T)()
     {
         static if (!is(T == void))
             static assert(allowed!(T), "Cannot store a " ~ T.stringof
@@ -589,7 +589,7 @@ public:
      * Returns the $(D_PARAM typeid) of the currently held value.
      */
 
-    TypeInfo type() const
+    @property TypeInfo type() const
     {
         TypeInfo result;
         fptr(OpID.getTypeInfo, null, &result);
@@ -1163,8 +1163,8 @@ static class VariantException : Exception
     this(TypeInfo source, TypeInfo target)
     {
         super("Variant: attempting to use incompatible types "
-                            ~ source.toString
-                            ~ " and " ~ target.toString);
+                            ~ source.toString()
+                            ~ " and " ~ target.toString());
         this.source = source;
         this.target = target;
     }

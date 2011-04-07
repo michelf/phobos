@@ -361,14 +361,14 @@ int[] a = [ 1, 2, 3 ];
 assert(a.front == 1);
 ----
 */
-ref T front(T)(T[] a)
+@property ref T front(T)(T[] a)
 if (!isNarrowString!(T[]) && !is(T[] == void[]))
 {
     assert(a.length, "Attempting to fetch the front of an empty array");
     return a[0];
 }
 
-dchar front(A)(A a) if (isNarrowString!A)
+@property dchar front(A)(A a) if (isNarrowString!A)
 {
     assert(a.length, "Attempting to fetch the front of an empty array");
     size_t i = 0;
@@ -780,7 +780,7 @@ if (isInputRange!RoR && isInputRange!(ElementType!RoR) && isForwardRange!R)
     }
     else
     {
-        return copy(iter, appender!(typeof(return))).data;
+        return copy(iter, appender!(typeof(return))()).data;
     }
 }
 
@@ -798,7 +798,7 @@ if (isInputRange!RoR && isInputRange!(ElementType!RoR))
     }
     else
     {
-        return copy(iter, appender!(typeof(return))).data;
+        return copy(iter, appender!(typeof(return))()).data;
     }
 }
 
@@ -1417,14 +1417,14 @@ struct SimpleSlice(T)
 /**
    Range primitives.
  */
-    bool empty() const
+    @property bool empty() const
     {
         assert(_b <= _e);
         return _b == _e;
     }
 
 /// Ditto
-    ref T front()
+    @property ref T front()
     {
         assert(!empty);
         return *_b;
@@ -1438,7 +1438,7 @@ struct SimpleSlice(T)
     }
 
 /// Ditto
-    ref T back()
+    @property ref T back()
     {
         assert(!empty);
         return _e[-1];

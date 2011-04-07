@@ -1165,7 +1165,7 @@ class Socket
 
 
         /// Get underlying socket handle.
-        socket_t handle()
+        @property socket_t handle()
         {
                 return sock;
         }
@@ -1177,7 +1177,7 @@ class Socket
          * will block and wait for data/action.
          * A non-blocking socket will immediately return instead of blocking.
          */
-        bool blocking()
+        @property bool blocking()
         {
                 version(Win32)
                 {
@@ -1190,7 +1190,7 @@ class Socket
         }
 
         /// ditto
-        void blocking(bool byes)
+        @property void blocking(bool byes)
         {
                 version(Win32)
                 {

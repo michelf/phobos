@@ -73,7 +73,8 @@ version(D_InlineAsm_X86)
             "Multithreading:   %d threads / %d cores\n", threadsPerCPU, coresPerCPU);
 
     }
-
+    @property
+    {
     /// Returns vendor string
     string vendor()             {return vendorStr.idup;} // todo: optimize
     /// Returns processor string
@@ -123,6 +124,7 @@ version(D_InlineAsm_X86)
     /// Returns family
     uint family()               {return _family;}
     //uint processorType()      {return (signature>>>12)&0x3;}
+    }
 
     shared static this()
     {

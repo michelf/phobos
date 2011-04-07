@@ -292,14 +292,14 @@ if (isAssociativeArray!S && isSomeString!T)
 }
 
 /**
-   Object to string conversion calls $(D toString) against the object or
+   Object to string conversion calls $(D toString()) against the object or
    returns $(D nullstr) if the object is null.
 */
 T toImpl(T, S)(S s, in T nullstr = "null")
 if (is(S : Object) && isSomeString!T)
 {
     if (!s) return nullstr;
-    return to!(T)(s.toString);
+    return to!(T)(s.toString());
 }
 
 unittest
@@ -313,13 +313,13 @@ unittest
 }
 
 /**
-   Struct to string conversion calls $(D toString) against the struct if
+   Struct to string conversion calls $(D toString()) against the struct if
    it is defined.
 */
 T toImpl(T, S)(S s)
-if (is(S == struct) && isSomeString!T && is(typeof(&S.init.toString)))
+if (is(S == struct) && isSomeString!T && is(typeof(S.init.toString())))
 {
-    return to!T(s.toString);
+    return to!T(s.toString());
 }
 
 unittest
@@ -330,12 +330,12 @@ unittest
 }
 
 /**
-   For structs that do not define $(D toString), the conversion to string
+   For structs that do not define $(D toString()), the conversion to string
    produces the list of fields.
 */
 T toImpl(T, S)(S s, in T left = S.stringof~"(", in T separator = ", ",
         in T right = ")")
-if (is(S == struct) && isSomeString!T && !is(typeof(&S.init.toString)) &&
+if (is(S == struct) && isSomeString!T && !is(typeof(S.init.toString())) &&
         !isInputRange!S)
 {
     Tuple!(FieldTypeTuple!(S)) * t = void;
@@ -3929,7 +3929,7 @@ template isOctalLiteral(string num) {
 
         assert(a == 8);
 */
-T octal(T, string num)() {
+@property T octal(T, string num)() {
     static assert(isOctalLiteral!num, num ~ " is not a valid octal literal");
 
     ulong pow = 1;

@@ -828,12 +828,12 @@ else version(Posix)
         }
 
     public:
-        interval_t periodCount() const
+        interval_t periodCount() const @property
         {
             return microseconds;
         }
 
-        interval_t seconds() const
+        interval_t seconds() const @property
         {
             interval_t   start   =      cast(interval_t)m_start.tv_sec + cast(interval_t)m_start.tv_usec / (1000 * 1000);
             interval_t   end        =   cast(interval_t)m_end.tv_sec      + cast(interval_t)m_end.tv_usec   / (1000 * 1000);
@@ -841,7 +841,7 @@ else version(Posix)
             return end - start;
         }
 
-        interval_t milliseconds() const
+        interval_t milliseconds() const @property
         {
             interval_t   start   =      cast(interval_t)m_start.tv_sec * 1000 + cast(interval_t)m_start.tv_usec / 1000;
             interval_t   end        =   cast(interval_t)m_end.tv_sec      * 1000 + cast(interval_t)m_end.tv_usec   / 1000;
@@ -849,7 +849,7 @@ else version(Posix)
             return end - start;
         }
 
-        interval_t microseconds() const
+        interval_t microseconds() const @property
         {
             interval_t   start   =      cast(interval_t)m_start.tv_sec * 1000 * 1000 + cast(interval_t)m_start.tv_usec;
             interval_t   end        =   cast(interval_t)m_end.tv_sec      * 1000 * 1000 + cast(interval_t)m_end.tv_usec;

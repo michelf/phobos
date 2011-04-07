@@ -77,17 +77,17 @@ private template createAccessors(
             static assert(len == 1);
             enum result =
             // getter
-                "bool " ~ name ~ "() const { return "
+                "bool " ~ name ~ "() const @property { return "
                 ~"("~store~" & "~myToString(maskAllElse)~") != 0;}\n"
             // setter
-                ~"void " ~ name ~ "(bool v){"
+                ~"void " ~ name ~ "(bool v) @property {"
                 ~"if (v) "~store~" |= "~myToString(maskAllElse)~";"
                 ~"else "~store~" &= ~"~myToString(maskAllElse)~";}\n";
         }
         else
         {
             // getter
-            enum result = T.stringof~" "~name~"() const { auto result = "
+            enum result = T.stringof~" "~name~"() const @property { auto result = "
                 "("~store~" & "
                 ~ myToString(maskAllElse) ~ ") >>"
                 ~ myToString(offset) ~ ";"
@@ -97,7 +97,7 @@ private template createAccessors(
                    : "")
                 ~ " return cast("~T.stringof~") result;}\n"
             // setter
-                ~"void "~name~"("~T.stringof~" v){ "
+                ~"void "~name~"("~T.stringof~" v) @property { "
                 ~"assert(v >= "~name~"_min); "
                 ~"assert(v <= "~name~"_max); "
                 ~store~" = cast(typeof("~store~"))"
@@ -309,7 +309,7 @@ else version(X86_64)
 else
     static assert(false, "unknown platform");
 
-    const size_t dim()
+    @property const size_t dim()
     {
         return (len + (bitsPerSizeT-1)) / bitsPerSizeT;
     }
@@ -325,7 +325,7 @@ else
         {
             if (newlen != len)
             {
-                size_t olddim = dim();
+                size_t olddim = dim;
                 size_t newdim = (newlen + (bitsPerSizeT-1)) / bitsPerSizeT;
 
                 if (newdim != olddim)
@@ -390,7 +390,7 @@ else
     /**********************************************
      * Support for array.dup property for BitArray.
      */
-    BitArray dup()
+    @property BitArray dup()
     {
         BitArray ba;
 
@@ -519,7 +519,7 @@ else
         int i;
 
         b.init(data);
-        b.reverse;
+        b.reverse();
         for (i = 0; i < data.length; i++)
         {
             assert(b[i] == data[4 - i]);
@@ -582,7 +582,7 @@ else
 
         __gshared size_t x = 0b1100011000;
         __gshared BitArray ba = { 10, &x };
-        ba.sort;
+        ba.sort();
         for (size_t i = 0; i < 6; i++)
             assert(ba[i] == false);
         for (size_t i = 6; i < 10; i++)
@@ -777,7 +777,7 @@ else
      */
     BitArray opCom()
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         BitArray result;
 
@@ -816,7 +816,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         BitArray result;
 
@@ -856,7 +856,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         BitArray result;
 
@@ -896,7 +896,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         BitArray result;
 
@@ -938,7 +938,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         BitArray result;
 
@@ -978,7 +978,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         for (size_t i = 0; i < dim; i++)
             ptr[i] &= e2.ptr[i];
@@ -1014,7 +1014,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         for (size_t i = 0; i < dim; i++)
             ptr[i] |= e2.ptr[i];
@@ -1049,7 +1049,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         for (size_t i = 0; i < dim; i++)
             ptr[i] ^= e2.ptr[i];
@@ -1086,7 +1086,7 @@ else
     }
     body
     {
-        auto dim = this.dim();
+        auto dim = this.dim;
 
         for (size_t i = 0; i < dim; i++)
             ptr[i] &= ~e2.ptr[i];
@@ -1184,7 +1184,7 @@ else
     {
         BitArray r;
 
-        r = this.dup;
+        r = this.dup();
         r.length = len + 1;
         r[len] = b;
         return r;

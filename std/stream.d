@@ -233,7 +233,7 @@ interface InputStream {
   int readf(...); /// ditto
 
   /// Retrieve the number of bytes available for immediate reading.
-  size_t available();
+  @property size_t available();
 
   /***
    * Return whether the current file position is the same as the end of the
@@ -1025,7 +1025,7 @@ class Stream : InputStream, OutputStream {
   }
 
   // returns estimated number of bytes available for immediate reading
-  size_t available() { return 0; }
+  @property size_t available() { return 0; }
 
   /***
    * Write up to size bytes from buffer in the stream, returning the actual
@@ -1242,18 +1242,18 @@ class Stream : InputStream, OutputStream {
   /***
    * Sets file position. Equivalent to calling seek(pos, SeekPos.Set).
    */
-  void position(ulong pos) { seek(cast(long)pos, SeekPos.Set); }
+  @property void position(ulong pos) { seek(cast(long)pos, SeekPos.Set); }
 
   /***
    * Returns current file position. Equivalent to seek(0, SeekPos.Current).
    */
-  ulong position() { return seek(0, SeekPos.Current); }
+  @property ulong position() { return seek(0, SeekPos.Current); }
 
   /***
    * Retrieve the size of the stream in bytes.
    * The stream must be seekable or a SeekException is thrown.
    */
-  ulong size() {
+  @property ulong size() {
     assertSeekable();
     ulong pos = position(), result = seek(0, SeekPos.End);
     position(pos);
@@ -1740,7 +1740,7 @@ class BufferedStream : FilterStream {
   }
 
   // returns size of stream
-  override ulong size() {
+  @property override ulong size() {
     if (bufferDirty) flush();
     return s.size();
   }
@@ -1939,7 +1939,7 @@ class File: Stream {
 
   version (Win32) {
     // returns size of stream
-    override ulong size() {
+    @property override ulong size() {
       assertSeekable();
       uint sizehi;
       uint sizelow = GetFileSize(hFile,&sizehi);
@@ -1994,7 +1994,7 @@ class File: Stream {
    * otherwise returns 0.
    */
 
-  override size_t available() {
+  @property override size_t available() {
     if (seekable) {
       ulong lavail = size - position;
       if (lavail > size_t.max) lavail = size_t.max;
@@ -2411,8 +2411,8 @@ class EndianStream : FilterStream {
     }
   }
 
-  override bool eof() { return s.eof() && !ungetAvailable();  }
-  override ulong size() { return s.size();  }
+  @property override bool eof() { return s.eof() && !ungetAvailable();  }
+  @property override ulong size() { return s.size();  }
 
   unittest {
     MemoryStream m;
@@ -2573,10 +2573,10 @@ class TArrayStream(Buffer): Stream {
     return cur;
   }
 
-  override size_t available () { return cast(size_t)(len - cur); }
+  @property override size_t available () { return cast(size_t)(len - cur); }
 
   /// Get the current memory data in total.
-  ubyte[] data() {
+  @property ubyte[] data() {
     if (len > size_t.max)
       throw new StreamException("Stream too big");
     const(void)[] res = buf[0 .. cast(size_t)len];

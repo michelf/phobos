@@ -2230,7 +2230,7 @@ public:
 
 
 /// Set all of the floating-point status flags to false.
-void resetIeeeFlags() { IeeeFlags.resetIeeeFlags; }
+void resetIeeeFlags() { IeeeFlags.resetIeeeFlags(); }
 
 /// Return a snapshot of the current state of the floating-point status flags.
 IeeeFlags ieeeFlags()

@@ -91,9 +91,9 @@ private
         {
             static if( T.length == 1 )
                 return is( T[0] == Variant ) ||
-                       data.convertsTo!(T);
+                       data.convertsTo!(T)();
             else
-                return data.convertsTo!(Tuple!(T));
+                return data.convertsTo!(Tuple!(T))();
         }
         
         auto get(T...)()
@@ -103,11 +103,11 @@ private
                 static if( is( T[0] == Variant ) )
                     return data;
                 else
-                    return data.get!(T);
+                    return data.get!(T)();
             }
             else
             {
-                return data.get!(Tuple!(T));
+                return data.get!(Tuple!(T))();
             }
         }
 
@@ -749,7 +749,7 @@ private
                     alias ParameterTypeTuple!(t) Args;
                     auto op = ops[i];
                     
-                    if( msg.convertsTo!(Args) )
+                    if( msg.convertsTo!(Args)() )
                     {
                         static if( is( ReturnType!(t) == bool ) )
                         {
@@ -926,8 +926,8 @@ private
         {
             void onLinkDeadMsg( ref Message msg )
             {
-                assert( msg.convertsTo!(Tid) );
-                auto tid = msg.get!(Tid);
+                assert( msg.convertsTo!(Tid)() );
+                auto tid = msg.get!(Tid)();
 
                 links.remove( tid );
                 if( tid == owner )
@@ -1162,7 +1162,7 @@ private
         /*
          *
          */
-        bool empty()
+        @property bool empty()
         {
             return m_first is null;
         }

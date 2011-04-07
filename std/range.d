@@ -191,13 +191,13 @@ version(unittest)
 
 /**
 Returns $(D true) if $(D R) is an input range. An input range must
-define the primitives $(D empty), $(D popFront), and $(D front). The
+define the primitives $(D empty), $(D popFront()), and $(D front). The
 following code should compile for any input range.
 
 ----
 R r;             // can define a range object
 if (r.empty) {}  // can test for empty
-r.popFront;          // can invoke next
+r.popFront();     // can invoke next
 auto h = r.front; // can get the front of the range
 ----
 
@@ -208,8 +208,8 @@ $(UL $(LI $(D r.empty) returns $(D false) iff there is more data
 available in the range.)  $(LI $(D r.front) returns the current element
 in the range. It may return by value or by reference. Calling $(D
 r.front) is allowed only if calling $(D r.empty) has, or would have,
-returned $(D false).) $(LI $(D r.popFront) advances to the next element in
-the range. Calling $(D r.popFront) is allowed only if calling $(D r.empty)
+returned $(D false).) $(LI $(D r.popFront()) advances to the next element in
+the range. Calling $(D r.popFront()) is allowed only if calling $(D r.empty)
 has, or would have, returned $(D false).))
  */
 template isInputRange(R)
@@ -230,8 +230,8 @@ unittest
     struct B
     {
         void popFront();
-        bool empty();
-        int front();
+        @property bool empty();
+        @property int front();
     }
     static assert(isInputRange!(B));
     static assert(isInputRange!(int[]));
@@ -464,7 +464,7 @@ range.
 ----
 R r;
 static assert(isForwardRange!(R)); // range is an input range
-r.popBack;                        // can invoke popBack
+r.popBack();                       // can invoke popBack
 auto t = r.back;                   // can get the back of the range
 ----
 The semantics of a bidirectional range (not checkable during compilation)
@@ -479,7 +479,7 @@ template isBidirectionalRange(R)
     enum bool isBidirectionalRange = isForwardRange!(R) && is(typeof(
     {
         R r;
-        r.popBack;         // can invoke popBack
+        r.popBack();        // can invoke popBack
         auto h = r.back;    // can get the back of the range
     }()));
 }
@@ -491,8 +491,8 @@ unittest
     struct B
     {
         void popFront();
-        bool empty();
-        int front();
+        @property bool empty();
+        @property int front();
     }
     static assert(!isBidirectionalRange!(B));
     struct C
@@ -547,26 +547,26 @@ unittest
     struct B
     {
         void popFront();
-        bool empty();
-        int front();
+        @property bool empty();
+        @property int front();
     }
     static assert(!isRandomAccessRange!(B));
     struct C
     {
         void popFront();
-        bool empty();
-        int front();
+        @property bool empty();
+        @property int front();
         void popBack();
-        int back();
+        @property int back();
     }
     static assert(!isRandomAccessRange!(C));
     struct D
     {
         bool empty();
         @property D save();
-        int front();
+        @property int front();
         void popFront();
-        int back();
+        @property int back();
         void popBack();
         ref int opIndex(uint);
         @property size_t length();
@@ -617,7 +617,7 @@ $(D T).
 template ElementType(R)
 {
     //alias typeof({ R r; return front(r[]); }()) ElementType;
-    static if (is(typeof({return R.init.front();}()) T))
+    static if (is(typeof({return R.init.front;}()) T))
         alias T ElementType;
     else
         alias void ElementType;
@@ -729,7 +729,7 @@ can be passed by reference and have their address taken.
 template hasLvalueElements(R)
 {
     enum bool hasLvalueElements =
-        is(typeof(&R.init.front()) == ElementType!(R)*);
+        is(typeof(&R.init.front) == ElementType!(R)*);
 }
 
 unittest {
@@ -830,7 +830,7 @@ checking $(D upTo).
 
 Otherwise, walks the range through its length and returns the number
 of elements seen. Performes $(BIGOH n) evaluations of $(D range.empty)
-and $(D range.popFront), where $(D n) is the effective length of $(D
+and $(D range.popFront()), where $(D n) is the effective length of $(D
 range). The $(D upTo) parameter is useful to "cut the losses" in case
 the interest is in seeing whether the range has at least some number
 of elements. If the parameter $(D upTo) is specified, stops if $(D
@@ -846,7 +846,7 @@ if (isInputRange!(Range))
     else
     {
         size_t result;
-        for (; result < upTo && !range.empty; range.popFront) ++result;
+        for (; result < upTo && !range.empty; range.popFront()) ++result;
         return result;
     }
 }
@@ -884,7 +884,7 @@ struct Retro(Range) if (isBidirectionalRange!(Unqual!Range) && !isRetro!Range)
 private:
     alias Unqual!Range R;
     R _input;
-    enum bool byRef = is(typeof(&(R.init.front())));
+    enum bool byRef = is(typeof(&(R.init.front)));
 
     static if(isRandomAccessRange!R && hasLength!R)
     {
@@ -917,7 +917,7 @@ Returns a copy of $(D this).
 /**
 Forwards to $(D _input.back).
  */
-    @property auto ref front()
+    @property auto ref front() 
     {
         return _input.back;
     }
@@ -950,11 +950,11 @@ Forwards to $(D _input.front).
     }
 
 /**
-Forwards to $(D _input.popFront).
+Forwards to $(D _input.popFront()).
  */
     void popBack()
     {
-        _input.popFront;
+        _input.popFront();
     }
 
 /**
@@ -1124,7 +1124,7 @@ unittest
 /**
 Iterates range $(D r) with stride $(D n). If the range is a
 random-access range, moves by indexing into the range; otehrwise,
-moves by successive calls to $(D popFront).
+moves by successive calls to $(D popFront()).
 
 Example:
 ----
@@ -1172,7 +1172,7 @@ Initializes the stride.
                 foreach (i; 0 .. slack)
                 {
                     if (_input.empty) break;
-                    _input.popBack;
+                    _input.popBack();
                 }
             }
         }
@@ -1247,7 +1247,7 @@ Forwards to $(D moveFront(_input)).
         else
             foreach (i; 0 .. _n)
             {
-                _input.popFront;
+                _input.popFront();
                 if (_input.empty) break;
             }
     }
@@ -1272,7 +1272,7 @@ Forwards to $(D _input.popBack).
                 foreach (i; 0 .. _n)
                 {
                     if (_input.empty) break;
-                    _input.popBack;
+                    _input.popBack();
                 }
             }
         }
@@ -1492,7 +1492,7 @@ unittest
 Spans multiple ranges in sequence. The function $(D chain) takes any
 number of ranges and returns a $(D Chain!(R1, R2,...)) object. The
 ranges may be different, but they must have the same element type. The
-result is a range that offers the $(D front), $(D popFront), and $(D empty)
+result is a range that offers the $(D front), $(D popFront()), and $(D empty)
 primitives. If all input ranges offer random access and $(D length),
 $(D Chain) offers them as well.
 
@@ -1599,7 +1599,7 @@ public:
         foreach (i, Unused; R)
         {
             if (_input[i].empty) continue;
-            _input[i].popFront;
+            _input[i].popFront();
             return;
         }
     }
@@ -1662,7 +1662,7 @@ public:
             foreach_reverse (i, Unused; R)
             {
                 if (_input[i].empty) continue;
-                _input[i].popBack;
+                _input[i].popBack();
                 return;
             }
         }
@@ -2001,7 +2001,7 @@ element.
             if (_up.empty)
             {
                 // no more stuff up, attempt to continue in the low area
-                _low.popBack;
+                _low.popBack();
             }
             else
             {
@@ -2013,8 +2013,8 @@ element.
         {
             // we consumed both the lower and the upper area, must
             // make real progress up there
-            if (!_up.empty) _up.popFront;
-            if (!_low.empty) _low.popBack;
+            if (!_up.empty) _up.popFront();
+            if (!_low.empty) _low.popBack();
             if (!_low.empty) _upIsActive = false;
         }
     }
@@ -2056,7 +2056,7 @@ element. Throws if the range is empty.
 ///
     static if(hasAssignableElements!R)
     {
-        auto front(ElementType!R val)
+        @property auto front(ElementType!R val)
         {
             assert(!empty, "Calling front() against an empty "
                     ~typeof(this).stringof);
@@ -2071,7 +2071,7 @@ element. Throws if the range is empty.
     }
 
 ///
-    typeof(this) save()
+    @property typeof(this) save()
     {
         auto ret = this;
         ret._low = _low.save;
@@ -2175,7 +2175,7 @@ public:
         assert(_maxAvailable > 0,
             "Attempting to popFront() past the end of a "
             ~ Take.stringof);
-        original.popFront;
+        original.popFront();
         --_maxAvailable;
     }
 
@@ -2470,7 +2470,7 @@ unittest
 
 /**
 Eagerly advances $(D r) itself (not a copy) $(D n) times (by calling
-$(D r.popFront) $(D n) times). The pass of $(D r) into $(D popFrontN)
+$(D r.popFront()) $(D n) times). The pass of $(D r) into $(D popFrontN)
 is by reference, so the original range is affected. Completes in
 $(BIGOH 1) steps for ranges that support slicing, and in $(BIGOH n)
 time for all other ranges.
@@ -2494,7 +2494,7 @@ size_t popFrontN(Range)(ref Range r, size_t n) if (isInputRange!(Range))
         foreach (i; 0 .. n)
         {
             if (r.empty) return i;
-            r.popFront;
+            r.popFront();
         }
     }
     return n;
@@ -2534,7 +2534,7 @@ size_t popBackN(Range)(ref Range r, size_t n) if (isInputRange!(Range))
         foreach (i; 0 .. n)
         {
             if (r.empty) return i;
-            r.popBack;
+            r.popBack();
         }
     }
     return n;
@@ -2684,7 +2684,7 @@ if (isForwardRange!(Unqual!Range) && !isInfinite!(Unqual!Range))
         /// Ditto
         void popFront()
         {
-            _current.popFront;
+            _current.popFront();
             if (_current.empty) _current = _original;
         }
 
@@ -2814,8 +2814,8 @@ unittest // For infinite ranges
     struct InfRange
     {
         void popFront() { }
-        int front() { return 0; }
-        enum empty = false;
+        @property int front() { return 0; }
+        @property enum empty = false;
     }
 
     InfRange i;
@@ -2888,7 +2888,7 @@ stopping policy.
     }
     else
     {
-        bool empty()
+        @property bool empty()
         {
             final switch (stoppingPolicy)
             {
@@ -3579,7 +3579,7 @@ unittest {
    assert(arr1 == [7,9,11,13,15]);
 
    // Make sure StoppingPolicy.requireSameLength throws.
-   arr2.popBack;
+   arr2.popBack();
    auto ls = lockstep(arr1, arr2, StoppingPolicy.requireSameLength);
 
    try {
@@ -4152,13 +4152,13 @@ struct FrontTransversal(Ror,
         {
             while (!_input.empty && _input.front.empty)
             {
-                _input.popFront;
+                _input.popFront();
             }
             static if (isBidirectionalRange!RangeOfRanges)
             {
                 while (!_input.empty && _input.back.empty)
                 {
-                    _input.popBack;
+                    _input.popBack();
                 }
             }
         }
@@ -4227,7 +4227,7 @@ struct FrontTransversal(Ror,
     void popFront()
     {
         assert(!empty);
-        _input.popFront;
+        _input.popFront();
         prime;
     }
 
@@ -4257,7 +4257,7 @@ isBidirectionalRange!RangeOfRanges).
         void popBack()
         {
             assert(!empty);
-            _input.popBack;
+            _input.popBack();
             prime;
         }
 
@@ -4425,13 +4425,13 @@ struct Transversal(Ror,
         {
             while (!_input.empty && _input.front.length <= _n)
             {
-                _input.popFront;
+                _input.popFront();
             }
             static if (isBidirectionalRange!RangeOfRanges)
             {
                 while (!_input.empty && _input.back.length <= _n)
                 {
-                    _input.popBack;
+                    _input.popBack();
                 }
             }
         }
@@ -4501,7 +4501,7 @@ struct Transversal(Ror,
     void popFront()
     {
         assert(!empty);
-        _input.popFront;
+        _input.popFront();
         prime;
     }
 
@@ -4531,7 +4531,7 @@ isBidirectionalRange!RangeOfRanges).
         void popBack()
         {
             assert(!empty);
-            _input.popBack;
+            _input.popBack();
             prime;
         }
 
@@ -4691,7 +4691,7 @@ struct Transposed(RangeOfRanges)
         foreach (ref e; _input)
         {
             if (e.empty) continue;
-            e.popFront;
+            e.popFront();
         }
     }
 

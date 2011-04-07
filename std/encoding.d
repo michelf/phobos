@@ -369,14 +369,14 @@ template EncoderFunctions()
 
     template ReadFromString()
     {
-        bool canRead() { return s.length != 0; }
+        @property bool canRead() { return s.length != 0; }
         E peek() { return s[0]; }
         E read() { E t = s[0]; s = s[1..$]; return t; }
     }
 
     template ReverseReadFromString()
     {
-        bool canRead() { return s.length != 0; }
+        @property bool canRead() { return s.length != 0; }
         E peek() { return s[$-1]; }
         E read() { E t = s[$-1]; s = s[0..$-1]; return t; }
     }
@@ -709,18 +709,18 @@ template EncoderInstance(CharType : AsciiChar)
 
     dchar decodeViaRead()()
     {
-        return read;
+        return read();
     }
 
     dchar safeDecodeViaRead()()
     {
-        dchar c = read;
+        dchar c = read();
         return canEncode(c) ? c : INVALID_SEQUENCE;
     }
 
     dchar decodeReverseViaRead()()
     {
-        return read;
+        return read();
     }
 
     EString replacementSequence()
@@ -786,17 +786,17 @@ template EncoderInstance(CharType : Latin1Char)
 
     dchar decodeViaRead()()
     {
-        return read;
+        return read();
     }
 
     dchar safeDecodeViaRead()()
     {
-        return read;
+        return read();
     }
 
     dchar decodeReverseViaRead()()
     {
-        return read;
+        return read();
     }
 
     EString replacementSequence()
@@ -887,20 +887,20 @@ template EncoderInstance(CharType : Windows1252Char)
 
     dchar decodeViaRead()()
     {
-        Windows1252Char c = read;
+        Windows1252Char c = read();
         return (c >= 0x80 && c < 0xA0) ? charMap[c-0x80] : c;
     }
 
     dchar safeDecodeViaRead()()
     {
-        Windows1252Char c = read;
+        Windows1252Char c = read();
         dchar d = (c >= 0x80 && c < 0xA0) ? charMap[c-0x80] : c;
         return d == 0xFFFD ? INVALID_SEQUENCE : d;
     }
 
     dchar decodeReverseViaRead()()
     {
-        Windows1252Char c = read;
+        Windows1252Char c = read();
         return (c >= 0x80 && c < 0xA0) ? charMap[c-0x80] : c;
     }
 
@@ -999,7 +999,7 @@ template EncoderInstance(CharType : char)
 
     void skipViaRead()()
     {
-        auto c = read;
+        auto c = read();
         if (c < 0xC0) return;
         int n = tails(cast(char) c);
         for (size_t i=0; i<n; ++i)
@@ -1010,26 +1010,26 @@ template EncoderInstance(CharType : char)
 
     dchar decodeViaRead()()
     {
-        dchar c = read;
+        dchar c = read();
         if (c < 0xC0) return c;
         int n = tails(cast(char) c);
         c &= (1 << (6 - n)) - 1;
         for (size_t i=0; i<n; ++i)
         {
-            c = (c << 6) + (read & 0x3F);
+            c = (c << 6) + (read() & 0x3F);
         }
         return c;
     }
 
     dchar safeDecodeViaRead()()
     {
-        dchar c = read;
+        dchar c = read();
         if (c < 0x80) return c;
         int n = tails(cast(char) c);
         if (n == 0) return INVALID_SEQUENCE;
 
         if (!canRead) return INVALID_SEQUENCE;
-        size_t d = peek;
+        size_t d = peek();
         bool err =
         (
             (c < 0xC2)                              // fail overlong 2-byte sequences
@@ -1044,9 +1044,9 @@ template EncoderInstance(CharType : char)
         for (size_t i=0; i<n; ++i)
         {
             if (!canRead) return INVALID_SEQUENCE;
-            d = peek;
+            d = peek();
             if ((d & 0xC0) != 0x80) return INVALID_SEQUENCE;
-            c = (c << 6) + (read & 0x3F);
+            c = (c << 6) + (read() & 0x3F);
         }
 
         return err ? INVALID_SEQUENCE : c;
@@ -1054,14 +1054,14 @@ template EncoderInstance(CharType : char)
 
     dchar decodeReverseViaRead()()
     {
-        dchar c = read;
+        dchar c = read();
         if (c < 0x80) return c;
         size_t shift = 0;
         c &= 0x3F;
         for (size_t i=0; i<4; ++i)
         {
             shift += 6;
-            auto d = read;
+            auto d = read();
             size_t n = tails(cast(char) d);
             size_t mask = n == 0 ? 0x3F : (1 << (6 - n)) - 1;
             c += ((d & mask) << shift);
@@ -1128,16 +1128,16 @@ template EncoderInstance(CharType : wchar)
 
     void skipViaRead()()
     {
-        wchar c = read;
+        wchar c = read();
         if (c < 0xD800 || c >= 0xE000) return;
         read();
     }
 
     dchar decodeViaRead()()
     {
-        wchar c = read;
+        wchar c = read();
         if (c < 0xD800 || c >= 0xE000) return cast(dchar)c;
-        wchar d = read;
+        wchar d = read();
         c &= 0x3FF;
         d &= 0x3FF;
         return 0x10000 + (c << 10) + d;
@@ -1145,13 +1145,13 @@ template EncoderInstance(CharType : wchar)
 
     dchar safeDecodeViaRead()()
     {
-        wchar c = read;
+        wchar c = read();
         if (c < 0xD800 || c >= 0xE000) return cast(dchar)c;
         if (c >= 0xDC00) return INVALID_SEQUENCE;
         if (!canRead) return INVALID_SEQUENCE;
-        wchar d = peek;
+        wchar d = peek();
         if (d < 0xDC00 || d >= 0xE000) return INVALID_SEQUENCE;
-        d = read;
+        d = read();
         c &= 0x3FF;
         d &= 0x3FF;
         return 0x10000 + (c << 10) + d;
@@ -1159,9 +1159,9 @@ template EncoderInstance(CharType : wchar)
 
     dchar decodeReverseViaRead()()
     {
-        wchar c = read;
+        wchar c = read();
         if (c < 0xD800 || c >= 0xE000) return cast(dchar)c;
-        wchar d = read;
+        wchar d = read();
         c &= 0x3FF;
         d &= 0x3FF;
         return 0x10000 + (d << 10) + c;
@@ -1221,18 +1221,18 @@ template EncoderInstance(CharType : dchar)
 
     dchar decodeViaRead()()
     {
-        return cast(dchar)read;
+        return cast(dchar)read();
     }
 
     dchar safeDecodeViaRead()()
     {
-        dchar c = read;
+        dchar c = read();
         return isValidCodePoint(c) ? c : INVALID_SEQUENCE;
     }
 
     dchar decodeReverseViaRead()()
     {
-        return cast(dchar)read;
+        return cast(dchar)read();
     }
 
     EString replacementSequence()
@@ -2198,7 +2198,7 @@ abstract class EncodingScheme
          * Normally this will be a representation of some substitution
          * character, such as U+FFFD or '?'.
          */
-        abstract immutable(ubyte)[] replacementSequence();
+        @property abstract immutable(ubyte)[] replacementSequence();
     }
 
     /**

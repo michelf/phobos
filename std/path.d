@@ -783,7 +783,7 @@ string rel2abs(string path)
     {
         return path;
     }
-    auto myDir = getcwd;
+    auto myDir = getcwd();
     if (path.startsWith(curdir[]))
     {
         auto p = path[curdir.length .. $];

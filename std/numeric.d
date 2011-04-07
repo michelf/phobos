@@ -2559,7 +2559,7 @@ struct Stride(R) {
         return range[index * _nSteps];
     }
 
-    E front() {
+    E front() @property {
         return range[0];
     }
 

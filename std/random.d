@@ -233,7 +233,7 @@ $(D x0).
                     ~ LinearCongruentialEngine.stringof);
         }
         _x = modulus ? (x0 % modulus) : x0;
-        popFront;
+        popFront();
     }
 
 /**
@@ -343,7 +343,7 @@ unittest
     foreach (e; checking0)
     {
         assert(rnd0.front == e);
-        rnd0.popFront;
+        rnd0.popFront();
     }
     // Test the 10000th invocation
     // Correct value taken from:
@@ -360,7 +360,7 @@ unittest
     foreach (e; checking)
     {
         assert(rnd.front == e);
-        rnd.popFront;
+        rnd.popFront();
     }
 
     // Test the 10000th invocation
@@ -443,7 +443,7 @@ Parameter for the generator.
             //mt[mti] &= ResultType.max;
             /* for >32 bit machines */
         }
-        popFront;
+        popFront();
     }
 
 /**
@@ -561,7 +561,7 @@ unittest
     }
     {
         Mt19937 gen;
-        gen.popFront;
+        gen.popFront();
         //popFrontN(gen, 1);  // skip 1 element
         b = gen.front;
     }
@@ -814,16 +814,16 @@ auto n = rnd.front;
 ----
 */
 
-uint unpredictableSeed()
+uint unpredictableSeed() @property
 {
     static bool seeded;
     static MinstdRand0 rand;
     if (!seeded) {
         uint threadID = cast(uint) cast(void*) Thread.getThis();
-        rand.seed((getpid + threadID) ^ cast(uint) Clock.currSystemTick().length);
+        rand.seed((getpid() + threadID) ^ cast(uint) Clock.currSystemTick().length);
         seeded = true;
     }
-    rand.popFront;
+    rand.popFront();
     return cast(uint) (Clock.currSystemTick().length ^ rand.front);
 }
 
@@ -849,7 +849,7 @@ Global random number generator used by various functions in this
 module whenever no generator is specified. It is allocated per-thread
 and initialized to an unpredictable value for each thread.
  */
-ref Random rndGen()
+@property ref Random rndGen()
 {
     static Random result;
     static bool initialized;
@@ -946,7 +946,7 @@ if (is(CommonType!(T1, UniformRandomNumberGenerator) == void) &&
         do
         {
             r = cast(NumberType) ((urng.front - urng.min) / bucketSize);
-            urng.popFront;
+            urng.popFront();
         }
         while (r > myRange);
         return cast(typeof(return)) (_a + r);
@@ -956,7 +956,7 @@ if (is(CommonType!(T1, UniformRandomNumberGenerator) == void) &&
         static assert(isFloatingPoint!NumberType);
         auto result = _a + (_b - _a) * cast(NumberType) (urng.front - urng.min)
             / (urng.max - urng.min);
-        urng.popFront;
+        urng.popFront();
         return result;
     }
 }
@@ -1170,7 +1170,7 @@ struct RandomCover(Range, Random)
         _input = input;
         _rnd = rnd;
         _chosen.length = _input.length;
-        popFront;
+        popFront();
     }
 
     static if (hasLength!Range)
@@ -1317,7 +1317,7 @@ Constructor.
 /// Ditto
     void popFront()
     {
-        _input.popFront;
+        _input.popFront();
         --_available;
         --_toSelect;
         ++_index;
@@ -1360,7 +1360,7 @@ Returns the index of the visited record.
             }
             // not chosen, retry
             assert(!_input.empty);
-            _input.popFront;
+            _input.popFront();
             ++_index;
             --_available;
             assert(_available > 0);
